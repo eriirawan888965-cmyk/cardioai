@@ -731,9 +731,13 @@ tr:hover td{background:rgba(56,189,248,0.03);color:var(--text)}
 
 <script>
 // ═══════════════════════════════════════════════════
-// KONFIGURASI API — Flask Backend
+// KONFIGURASI API — otomatis detect Railway atau lokal
 // ═══════════════════════════════════════════════════
-const API_BASE = 'http://localhost:5000/api';
+const IS_LOCAL  = window.location.hostname === 'localhost' || 
+                  window.location.hostname === '127.0.0.1';
+const API_BASE  = IS_LOCAL 
+    ? 'http://localhost:5000/api' 
+    : window.location.origin + '/api';
 
 // ═══════════════════════════════════════════════════
 // DATA & STATE

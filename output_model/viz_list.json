@@ -1,0 +1,15 @@
+[
+  "01_distribusi_data.png",
+  "02_correlation_heatmap.png",
+  "03_confusion_matrix.png",
+  "04_roc_curve.png",
+  "05_feature_importance_rf.png",
+  "06_cross_validation.png",
+  "07_shap_bar_global.png",
+  "08_shap_beeswarm.png",
+  "09_shap_waterfall_high_risk.png",
+  "10_shap_dependency_top4.png",
+  "11_shap_force_high_risk.html",
+  "11_shap_force_low_risk.html",
+  "12_shap_pos_neg.png"
+]

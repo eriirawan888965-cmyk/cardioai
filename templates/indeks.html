@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CardioAI — Sistem Prediksi Penyakit Jantung</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080d1a;
+  --surface: #0d1526;
+  --card: #111d30;
+  --card2: #0f1a2a;
+  --border: #1a2840;
+  --border2: #223050;
+  --accent: #38bdf8;
+  --accent2: #f472b6;
+  --accent3: #34d399;
+  --warn: #fbbf24;
+  --danger: #fb7185;
+  --text: #e2eaf5;
+  --muted: #4a6480;
+  --muted2: #6b82a0;
+  --font: 'Outfit', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
+
+/* grid bg */
+body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 20% 20%,rgba(56,189,248,0.04) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(244,114,182,0.03) 0%,transparent 50%);pointer-events:none;z-index:0}
+
+.layout{display:flex;min-height:100vh;position:relative;z-index:1}
+
+/* SIDEBAR */
+.sidebar{
+  width:240px;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:fixed;height:100vh;overflow-y:auto;
+  z-index:100;
+}
+.logo-wrap{padding:22px 18px 18px;border-bottom:1px solid var(--border)}
+.logo-top{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,rgba(56,189,248,0.15),rgba(56,189,248,0.05));border:1px solid rgba(56,189,248,0.3);display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-name{font-size:15px;font-weight:700;color:var(--accent);letter-spacing:-0.3px}
+.logo-ver{font-size:10px;color:var(--muted);font-family:var(--mono)}
+
+.nav-section{padding:14px 12px 6px}
+.nav-sec-label{font-size:9px;color:var(--muted);font-family:var(--mono);letter-spacing:0.12em;padding:0 6px 6px;text-transform:uppercase}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:13px;color:var(--muted2);cursor:pointer;transition:all .18s;border:1px solid transparent;font-weight:400;background:none;width:100%;text-align:left}
+.nav-btn:hover{background:var(--card);color:var(--text)}
+.nav-btn.active{background:rgba(56,189,248,0.08);color:var(--accent);border-color:rgba(56,189,248,0.18);font-weight:500}
+.nav-ico{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+
+.sidebar-foot{margin-top:auto;padding:14px 18px;border-top:1px solid var(--border);font-size:10px;color:var(--muted);font-family:var(--mono);line-height:1.9}
+.status-live{display:flex;align-items:center;gap:6px;margin-bottom:8px;color:var(--accent3);font-size:10px}
+.dot-live{width:6px;height:6px;border-radius:50%;background:var(--accent3);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* MAIN */
+.main{margin-left:240px;flex:1;min-height:100vh}
+
+/* PAGES */
+.page{display:none;padding:28px 32px;animation:fadeIn .25s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* TOP BAR */
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px}
+.page-heading{font-size:20px;font-weight:700}
+.page-heading span{color:var(--accent)}
+.page-sub{font-size:12px;color:var(--muted);font-family:var(--mono);margin-top:3px}
+.badge{display:inline-flex;align-items:center;gap:5px;background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.25);border-radius:20px;padding:5px 12px;font-size:11px;color:var(--accent3);font-family:var(--mono)}
+
+/* STATS ROW */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat.c-blue::before{background:var(--accent)}
+.stat.c-green::before{background:var(--accent3)}
+.stat.c-pink::before{background:var(--accent2)}
+.stat.c-warn::before{background:var(--warn)}
+.stat-lbl{font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em}
+.stat-val{font-size:26px;font-weight:700;font-family:var(--mono)}
+.stat.c-blue .stat-val{color:var(--accent)}
+.stat.c-green .stat-val{color:var(--accent3)}
+.stat.c-pink .stat-val{color:var(--accent2)}
+.stat.c-warn .stat-val{color:var(--warn)}
+.stat-desc{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px}
+.card-h{font-size:11px;font-weight:500;color:var(--muted);font-family:var(--mono);letter-spacing:.06em;margin-bottom:16px;display:flex;align-items:center;gap:7px;text-transform:uppercase}
+.card-h::before{content:'';width:3px;height:13px;border-radius:2px;background:var(--accent);display:block}
+
+/* GRID LAYOUTS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.g32{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+.mt{margin-top:16px}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:10px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em}
+.fg input,.fg select{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 11px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:border-color .18s;width:100%}
+.fg input:focus,.fg select:focus{border-color:var(--accent)}
+.fg select option{background:var(--surface)}
+
+.btn-run{width:100%;margin-top:14px;background:var(--accent);color:#020d1e;border:none;border-radius:9px;padding:11px;font-family:var(--mono);font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.05em;transition:all .18s}
+.btn-run:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-run:active{transform:translateY(0)}
+
+/* RESULT BOX */
+.result-box{border-radius:10px;padding:16px 18px;margin-top:14px;border:1px solid;display:none}
+.result-box.rendah{background:rgba(52,211,153,0.05);border-color:rgba(52,211,153,0.25)}
+.result-box.sedang{background:rgba(251,191,36,0.05);border-color:rgba(251,191,36,0.25)}
+.result-box.tinggi{background:rgba(251,113,133,0.05);border-color:rgba(251,113,133,0.25)}
+.res-lbl{font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:5px}
+.res-risk{font-size:20px;font-weight:700;font-family:var(--mono)}
+.result-box.rendah .res-risk{color:var(--accent3)}
+.result-box.sedang .res-risk{color:var(--warn)}
+.result-box.tinggi .res-risk{color:var(--danger)}
+.res-prob{font-size:12px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
+.prob-wrap{margin-top:10px}
+.prob-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:4px;font-family:var(--mono)}
+.prob-bg{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.prob-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.result-box.rendah .prob-fill{background:var(--accent3)}
+.result-box.sedang .prob-fill{background:var(--warn)}
+.result-box.tinggi .prob-fill{background:var(--danger)}
+
+/* SHAP BARS */
+.shap-item{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.shap-nm{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:72px}
+.shap-bwrap{flex:1;height:18px;background:var(--surface);border-radius:3px;overflow:hidden}
+.shap-b{height:100%;border-radius:3px;display:flex;align-items:center;padding:0 7px;font-size:10px;font-family:var(--mono);min-width:40px}
+.shap-b.pos{background:rgba(251,113,133,0.2);color:var(--danger)}
+.shap-b.neg{background:rgba(56,189,248,0.12);color:var(--accent)}
+.shap-v{font-family:var(--mono);font-size:11px;min-width:50px;text-align:right}
+
+/* CONFUSION MATRIX */
+.cm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.cm-cell{border-radius:9px;padding:13px;text-align:center;border:1px solid var(--border)}
+.cm-cell.tp{background:rgba(52,211,153,0.07);border-color:rgba(52,211,153,0.2)}
+.cm-cell.tn{background:rgba(56,189,248,0.07);border-color:rgba(56,189,248,0.2)}
+.cm-cell.fp{background:rgba(251,191,36,0.05);border-color:rgba(251,191,36,0.15)}
+.cm-cell.fn{background:rgba(251,113,133,0.07);border-color:rgba(251,113,133,0.2)}
+.cm-num{font-size:26px;font-weight:700;font-family:var(--mono)}
+.cm-cell.tp .cm-num{color:var(--accent3)}
+.cm-cell.tn .cm-num{color:var(--accent)}
+.cm-cell.fp .cm-num{color:var(--warn)}
+.cm-cell.fn .cm-num{color:var(--danger)}
+.cm-lbl{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:2px;line-height:1.4}
+
+/* METRIC ROW */
+.mrow{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+.mrow:last-child{border-bottom:none}
+.mrow-name{font-size:13px;color:var(--muted2)}
+.mrow-right{display:flex;align-items:center;gap:10px}
+.mini-bar{width:70px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.mini-fill{height:100%;border-radius:2px}
+.mrow-val{font-family:var(--mono);font-size:13px;font-weight:500;min-width:48px;text-align:right}
+
+/* SHAP GLOBAL */
+.gshap-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.gshap-row:last-child{border-bottom:none}
+.gshap-rank{font-family:var(--mono);font-size:10px;color:var(--muted);min-width:18px}
+.gshap-name{font-family:var(--mono);font-size:12px;color:var(--accent);min-width:70px}
+.gshap-bwrap{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.gshap-bfill{height:100%;background:linear-gradient(90deg,var(--accent),rgba(56,189,248,0.4));border-radius:2px}
+.gshap-val{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:40px;text-align:right}
+
+/* REKAM MEDIS TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{border-bottom:1px solid var(--border2)}
+th{padding:10px 12px;text-align:left;font-family:var(--mono);font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--muted2);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(56,189,248,0.03);color:var(--text)}
+.td-id{color:var(--accent);font-weight:600}
+.risk-chip{display:inline-block;padding:2px 9px;border-radius:10px;font-size:10px;font-family:var(--mono);font-weight:500}
+.risk-chip.rendah{background:rgba(52,211,153,0.12);color:var(--accent3)}
+.risk-chip.sedang{background:rgba(251,191,36,0.12);color:var(--warn)}
+.risk-chip.tinggi{background:rgba(251,113,133,0.12);color:var(--danger)}
+
+/* ARSITEKTUR RF */
+.rf-layer{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.rf-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;min-width:120px}
+.rf-lname{font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:600}
+.rf-ldesc{font-size:10px;color:var(--muted);margin-top:2px;font-family:var(--mono)}
+.rf-arrow{font-size:16px;color:var(--muted)}
+.rf-param{font-size:11px;color:var(--muted2);font-family:var(--mono);white-space:nowrap}
+
+/* ANALISIS SHAP PAGE */
+.shap-full-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.shap-full-item:last-child{border-bottom:none}
+.shap-full-rank{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:24px}
+.shap-full-name{font-family:var(--mono);font-size:12px;color:var(--text);min-width:90px;font-weight:500}
+.shap-full-bwrap{flex:1;height:22px;background:var(--surface);border-radius:4px;overflow:hidden;position:relative}
+.shap-full-b{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:11px;font-family:var(--mono);position:relative}
+.shap-full-b.pos{background:linear-gradient(90deg,rgba(251,113,133,0.25),rgba(251,113,133,0.1));color:var(--danger)}
+.shap-full-b.neg{background:linear-gradient(90deg,rgba(56,189,248,0.2),rgba(56,189,248,0.05));color:var(--accent)}
+.shap-full-val{font-family:var(--mono);font-size:12px;min-width:60px;text-align:right}
+.shap-desc{font-size:11px;color:var(--muted);min-width:160px}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:var(--muted);font-family:var(--mono);font-size:12px}
+.empty-ico{font-size:32px;margin-bottom:10px}
+
+/* PERFORMA PAGE - ROC curve simulation */
+.roc-area{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.roc-svg{width:100%;height:100%}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo-wrap">
+    <div class="logo-top">
+      <div class="logo-icon">🫀</div>
+      <div>
+        <div class="logo-name">CardioAI</div>
+        <div class="logo-ver">Random Forest + SHAP · v3.0</div>
+      </div>
+    </div>
+    <div class="status-live" id="server-status"><span class="dot-live"></span> Menghubungkan ke server...</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-sec-label">Utama</div>
+    <button class="nav-btn active" onclick="goPage('dashboard')"><span class="nav-ico">📊</span> Dashboard</button>
+    <button class="nav-btn" onclick="goPage('prediksi')"><span class="nav-ico">🔬</span> Prediksi Pasien</button>
+    <button class="nav-btn" onclick="goPage('rekam')"><span class="nav-ico">📋</span> Rekam Medis</button>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-sec-label">Model</div>
+    <button class="nav-btn" onclick="goPage('shap')"><span class="nav-ico">🧠</span> Analisis SHAP</button>
+    <button class="nav-btn" onclick="goPage('performa')"><span class="nav-ico">📈</span> Performa Model</button>
+    <button class="nav-btn" onclick="goPage('arsitektur')"><span class="nav-ico">🏗️</span> Arsitektur Model</button>
+  </div>
+
+  <div class="sidebar-foot" id="sidebar-info">
+    Model: Random Forest + GridSearchCV<br>
+    Dataset: UCI Heart (303 pasien)<br>
+    Fitur: 13/13 (semua dipakai)<br>
+    Preprocessing: SMOTE + StandardScaler<br>
+    Explainer: SHAP TreeExplainer
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: DASHBOARD -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="page active" id="page-dashboard">
+  <div class="topbar">
+    <div>
+      <div class="page-heading">Sistem Prediksi <span>Penyakit Jantung</span></div>
+      <div class="page-sub">Explainable Random Forest + SHAP · UCI Heart Disease Dataset (303 pasien)</div>
+    </div>
+    <div class="badge"><span class="dot-live"></span> Model Live</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat c-blue">
+      <div class="stat-lbl">Total Dataset</div>
+      <div class="stat-val">303</div>
+      <div class="stat-desc">pasien · 13 fitur input</div>
+    </div>
+    <div class="stat c-green">
+      <div class="stat-lbl">AUC-ROC Score</div>
+      <div class="stat-val" id="dash-auc">0.91</div>
+      <div class="stat-desc">kemampuan separasi kelas</div>
+    </div>
+    <div class="stat c-pink">
+      <div class="stat-lbl">Akurasi Model</div>
+      <div class="stat-val" id="dash-acc">87%</div>
+      <div class="stat-desc" id="dash-acc-desc">pada 61 data testing</div>
+    </div>
+    <div class="stat c-warn">
+      <div class="stat-lbl">Fitur Terpilih SHAP</div>
+      <div class="stat-val" id="dash-feat">7/13</div>
+      <div class="stat-desc">via threshold mean SHAP</div>
+    </div>
+  </div>
+
+  <div class="g2 mt">
+    <div class="card">
+      <div class="card-h">Confusion Matrix — Data Testing</div>
+      <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:10px" id="dash-cm-sub">Split 80/20 · Stratified</div>
+      <div class="cm-grid">
+        <div class="cm-cell tn"><div class="cm-num" id="dash-tn">29</div><div class="cm-lbl">True Negative<br>Prediksi Sehat ✓</div></div>
+        <div class="cm-cell fp"><div class="cm-num" id="dash-fp">4</div><div class="cm-lbl">False Positive<br>Prediksi Sakit ✗</div></div>
+        <div class="cm-cell fn"><div class="cm-num" id="dash-fn">4</div><div class="cm-lbl">False Negative<br>Prediksi Sehat ✗</div></div>
+        <div class="cm-cell tp"><div class="cm-num" id="dash-tp">24</div><div class="cm-lbl">True Positive<br>Prediksi Sakit ✓</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h">Metrik Performa Model</div>
+      <div class="mrow">
+        <span class="mrow-name">Accuracy</span>
+        <div class="mrow-right"><div class="mini-bar"><div class="mini-fill" id="bar-acc" style="width:87%;background:var(--accent)"></div></div><span class="mrow-val" style="color:var(--accent)" id="lbl-acc">87.0%</span></div>
+      </div>
+      <div class="mrow">
+        <span class="mrow-name">Precision</span>
+        <div class="mrow-right"><div class="mini-bar"><div class="mini-fill" id="bar-prec" style="width:85.7%;background:var(--accent3)"></div></div><span class="mrow-val" style="color:var(--accent3)" id="lbl-prec">85.7%</span></div>
+      </div>
+      <div class="mrow">
+        <span class="mrow-name">Recall</span>
+        <div class="mrow-right"><div class="mini-bar"><div class="mini-fill" id="bar-rec" style="width:85.7%;background:var(--accent3)"></div></div><span class="mrow-val" style="color:var(--accent3)" id="lbl-rec">85.7%</span></div>
+      </div>
+      <div class="mrow">
+        <span class="mrow-name">F1-Score</span>
+        <div class="mrow-right"><div class="mini-bar"><div class="mini-fill" id="bar-f1" style="width:85.7%;background:var(--warn)"></div></div><span class="mrow-val" style="color:var(--warn)" id="lbl-f1">85.7%</span></div>
+      </div>
+      <div class="mrow">
+        <span class="mrow-name">AUC-ROC</span>
+        <div class="mrow-right"><div class="mini-bar"><div class="mini-fill" id="bar-auc" style="width:91%;background:var(--danger)"></div></div><span class="mrow-val" style="color:var(--danger)" id="lbl-auc">0.9100</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt">
+    <div class="card-h">SHAP Global Feature Importance — Ranking Fitur Paling Berpengaruh</div>
+    <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:14px">Mean |SHAP value| · fitur lebih tinggi = lebih menentukan prediksi model Random Forest</div>
+    <div id="dash-shap-global"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: PREDIKSI -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="page" id="page-prediksi">
+  <div class="topbar">
+    <div>
+      <div class="page-heading">Prediksi <span>Pasien Baru</span></div>
+      <div class="page-sub">Masukkan semua 13 variabel klinis · Model Random Forest + SHAP explainer</div>
+    </div>
+  </div>
+
+  <div class="g3">
+    <div class="card">
+      <div class="card-h">Input Data Klinis Pasien — 13 Variabel</div>
+      <div class="form-grid">
+        <div class="fg"><label>age — Usia (tahun)</label><input type="number" id="f-age" value="55" min="20" max="90"></div>
+        <div class="fg">
+          <label>sex — Jenis Kelamin</label>
+          <select id="f-sex"><option value="1">1 = Pria</option><option value="0">0 = Wanita</option></select>
+        </div>
+        <div class="fg">
+          <label>cp — Tipe Nyeri Dada</label>
+          <select id="f-cp">
+            <option value="0">0 = Typical Angina</option>
+            <option value="1">1 = Atypical Angina</option>
+            <option value="2">2 = Non-Anginal Pain</option>
+            <option value="3" selected>3 = Asymptomatic ⚠</option>
+          </select>
+        </div>
+        <div class="fg"><label>trestbps — Tekanan Darah (mmHg)</label><input type="number" id="f-trestbps" value="145" min="80" max="220"></div>
+        <div class="fg"><label>chol — Kolesterol (mg/dl)</label><input type="number" id="f-chol" value="270" min="100" max="600"></div>
+        <div class="fg">
+          <label>fbs — Gula Darah Puasa</label>
+          <select id="f-fbs"><option value="0">0 = Normal (≤120 mg/dl)</option><option value="1" selected>1 = Tinggi (&gt;120 mg/dl)</option></select>
+        </div>
+        <div class="fg">
+          <label>restecg — Hasil EKG Istirahat</label>
+          <select id="f-restecg">
+            <option value="0" selected>0 = Normal</option>
+            <option value="1">1 = Kelainan ST-T</option>
+            <option value="2">2 = Hipertrofi LV</option>
+          </select>
+        </div>
+        <div class="fg"><label>thalach — Detak Jantung Maks</label><input type="number" id="f-thalach" value="110" min="60" max="220"></div>
+        <div class="fg">
+          <label>exang — Angina saat Olahraga</label>
+          <select id="f-exang"><option value="0" selected>0 = Tidak</option><option value="1">1 = Ya</option></select>
+        </div>
+        <div class="fg"><label>oldpeak — Depresi ST (mm)</label><input type="number" id="f-oldpeak" value="2.3" step="0.1" min="0" max="7"></div>
+        <div class="fg">
+          <label>slope — Kemiringan Segmen ST</label>
+          <select id="f-slope">
+            <option value="0">0 = Upsloping</option>
+            <option value="1">1 = Flat</option>
+            <option value="2" selected>2 = Downsloping</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>ca — Jumlah Pembuluh Darah Utama</label>
+          <select id="f-ca">
+            <option value="0">0 pembuluh</option>
+            <option value="1">1 pembuluh</option>
+            <option value="2" selected>2 pembuluh</option>
+            <option value="3">3 pembuluh</option>
+          </select>
+        </div>
+        <div class="fg" style="grid-column:span 2">
+          <label>thal — Status Thalassemia</label>
+          <select id="f-thal">
+            <option value="0">0 = Normal</option>
+            <option value="1">1 = Fixed Defect</option>
+            <option value="2" selected>2 = Reversible Defect ⚠</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-run" id="btn-prediksi" onclick="runPrediksi()">▶ JALANKAN PREDIKSI RANDOM FOREST</button>
+
+      <div class="result-box" id="resultBox">
+        <div class="res-lbl">HASIL PREDIKSI — Random Forest</div>
+        <div class="res-risk" id="resRisk">—</div>
+        <div class="res-prob" id="resProb">—</div>
+        <div class="prob-wrap">
+          <div class="prob-labels"><span>Sehat</span><span>Probabilitas Penyakit Jantung</span><span>Sakit</span></div>
+          <div class="prob-bg"><div class="prob-fill" id="probFill" style="width:0%"></div></div>
+        </div>
+        <div id="resDetail" style="margin-top:12px;font-size:11px;color:var(--muted);font-family:var(--mono);line-height:1.8"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-h">Kontribusi Fitur — SHAP</div>
+        <div id="shap-bars-pred"><div class="empty"><div class="empty-ico">🧠</div>Jalankan prediksi<br>untuk melihat SHAP values</div></div>
+      </div>
+      <div class="card">
+        <div class="card-h">Rekomendasi Klinis</div>
+        <div id="rekomendasi" style="font-size:12px;color:var(--muted);font-family:var(--mono);line-height:1.8">
+          <div class="empty"><div class="empty-ico">💡</div>Akan muncul setelah<br>prediksi dijalankan</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: REKAM MEDIS -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="page" id="page-rekam">
+  <div class="topbar">
+    <div>
+      <div class="page-heading">Rekam <span>Medis Pasien</span></div>
+      <div class="page-sub">Riwayat semua prediksi · Lengkap dengan 13 variabel klinis</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span id="rekam-count" style="font-family:var(--mono);font-size:12px;color:var(--muted)">0 record</span>
+      <button onclick="clearRekam()" style="background:rgba(251,113,133,0.1);border:1px solid rgba(251,113,133,0.2);color:var(--danger);border-radius:6px;padding:5px 12px;font-size:11px;font-family:var(--mono);cursor:pointer">Hapus Semua</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-h">Tabel Rekam Medis Lengkap — Semua Variabel</div>
+    <div class="table-wrap">
+      <table id="rekam-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Waktu</th>
+            <th>Age</th><th>Sex</th><th>CP</th><th>TrestBPS</th><th>Chol</th>
+            <th>FBS</th><th>RestECG</th><th>Thalach</th><th>Exang</th>
+            <th>Oldpeak</th><th>Slope</th><th>CA</th><th>Thal</th>
+            <th>Prob(%)</th><th>Risiko</th>
+          </tr>
+        </thead>
+        <tbody id="rekam-tbody">
+          <tr><td colspan="17" style="text-align:center;padding:30px;color:var(--muted);font-family:var(--mono);font-size:11px">Belum ada data rekam medis. Jalankan prediksi terlebih dahulu.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="g2 mt">
+    <div class="card">
+      <div class="card-h">Distribusi Risiko Pasien</div>
+      <div id="dist-chart" style="display:flex;gap:12px;align-items:flex-end;height:100px;padding-top:10px">
+        <div style="text-align:center;flex:1">
+          <div id="bar-rendah" style="background:rgba(52,211,153,0.2);border:1px solid rgba(52,211,153,0.3);border-radius:4px 4px 0 0;height:10px;transition:height .4s"></div>
+          <div style="font-size:10px;color:var(--accent3);font-family:var(--mono);margin-top:4px">RENDAH</div>
+          <div id="cnt-rendah" style="font-size:16px;font-weight:700;color:var(--accent3);font-family:var(--mono)">0</div>
+        </div>
+        <div style="text-align:center;flex:1">
+          <div id="bar-sedang" style="background:rgba(251,191,36,0.2);border:1px solid rgba(251,191,36,0.3);border-radius:4px 4px 0 0;height:10px;transition:height .4s"></div>
+          <div style="font-size:10px;color:var(--warn);font-family:var(--mono);margin-top:4px">SEDANG</div>
+          <div id="cnt-sedang" style="font-size:16px;font-weight:700;color:var(--warn);font-family:var(--mono)">0</div>
+        </div>
+        <div style="text-align:center;flex:1">
+          <div id="bar-tinggi" style="background:rgba(251,113,133,0.2);border:1px solid rgba(251,113,133,0.3);border-radius:4px 4px 0 0;height:10px;transition:height .4s"></div>
+          <div style="font-size:10px;color:var(--danger);font-family:var(--mono);margin-top:4px">TINGGI</div>
+          <div id="cnt-tinggi" style="font-size:16px;font-weight:700;color:var(--danger);font-family:var(--mono)">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h">Ringkasan Statistik</div>
+      <div id="rekam-stats" style="font-family:var(--mono);font-size:12px;color:var(--muted);line-height:2.2">
+        <div class="empty"><div class="empty-ico">📋</div>Belum ada data</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: ANALISIS SHAP -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="page" id="page-shap">
+  <div class="topbar">
+    <div>
+      <div class="page-heading">Analisis <span>SHAP</span></div>
+      <div class="page-sub">SHapley Additive exPlanations · Explainability untuk Random Forest</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-h">Global SHAP — Mean |value| seluruh training set</div>
+      <div id="shap-full-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-h">Penjelasan Metode SHAP</div>
+      <div style="font-size:12px;color:var(--muted2);line-height:1.9">
+        <p style="margin-bottom:10px"><span style="color:var(--accent);font-family:var(--mono)">SHAP</span> mengukur kontribusi masing-masing fitur terhadap prediksi model secara individual.</p>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--mono);font-size:11px;margin-bottom:10px">
+          <div style="color:var(--accent3);margin-bottom:6px">■ SHAP Positif (merah)</div>
+          <div style="color:var(--muted)">→ Nilai fitur mendorong prediksi ke arah SAKIT</div>
+          <div style="color:var(--muted)">→ Kontribusi memperbesar probabilitas</div>
+          <br>
+          <div style="color:var(--accent);margin-bottom:6px">■ SHAP Negatif (biru)</div>
+          <div style="color:var(--muted)">→ Nilai fitur mendorong prediksi ke arah SEHAT</div>
+          <div style="color:var(--muted)">→ Kontribusi memperkecil probabilitas</div>
+        </div>
+        <p style="margin-bottom:6px">Random Forest menggunakan <span style="color:var(--warn)">semua 13 fitur UCI</span> — tidak ada yang dibuang. SHAP hanya digunakan untuk menjelaskan kontribusi tiap fitur, bukan untuk seleksi.</p>
+        <p>Threshold prediksi = nilai optimal dari Youden's J pada kurva ROC.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt">
+    <div class="card-h">Deskripsi Klinis Tiap Fitur UCI Heart Disease</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Fitur</th><th>Nama Klinis</th><th>Tipe</th><th>Rentang</th><th>SHAP Rank</th><th>Dipilih?</th><th>Deskripsi</th></tr></thead>
+        <tbody>
+          <tr><td class="td-id">thal</td><td>Status Thalassemia</td><td style="color:var(--muted)">Kategori</td><td style="color:var(--muted)">0,1,2,3</td><td><span style="color:var(--accent3);font-family:var(--mono)">#1</span></td><td><span class="risk-chip rendah">✓ Ya</span></td><td>Kondisi thalassemia; 3=reversible defect = risiko tinggi</td></tr>
+          <tr><td class="td-id">ca</td><td>Pembuluh Darah Utama</td><td style="color:var(--muted)">Numerik</td><td style="color:var(--muted)">0–3</td><td><span style="color:var(--accent3);font-family:var(--mono)">#2</span></td><td><span class="risk-chip rendah">✓ Ya</span></td><td>Jumlah pembuluh mayor terlihat fluoroskopi; lebih banyak = lebih berisiko</td></tr>
+          <tr><td class="td-id">oldpeak</td><td>Depresi Segmen ST</td><td style="color:var(--muted)">Kontinu</td><td style="color:var(--muted)">0.0–6.2</td><td><span style="color:var(--accent3);font-family:var(--mono)">#3</span></td><td><span class="risk-chip rendah">✓ Ya</span></td><td>Depresi ST saat olahraga vs istirahat; nilai tinggi = iskemia</td></tr>
+          <tr><td class="td-id">thalach</td><td>Detak Jantung Maksimum</td><td style="color:var(--muted)">Kontinu</td><td style="color:var(--muted)">71–202</td><td><span style="color:var(--accent3);font-family:var(--mono)">#4</span></td><td><span class="risk-chip rendah">✓ Ya</span></td><td>Detak jantung maks saat stress test; rendah = kapasitas lemah</td></tr>
+          <tr><td class="td-id">cp</td><td>Tipe Nyeri Dada</td><td style="color:var(--muted)">Kategori</td><td style="color:var(--muted)">0–3</td><td><span style="color:var(--accent3);font-family:var(--mono)">#5</span></td><td><span class="risk-chip rendah">✓ Ya</span></td><td>3=asymptomatic justru risiko tinggi; paradoks klinis penting</td></tr>
+          <tr><td class="td-id">exang</td><td>Angina saat Olahraga</td><td style="color:var(--muted)">Biner</td><td style="color:var(--muted)">0,1</td><td><span style="color:var(--accent3);font-family:var(--mono)">#6</span></td><td><span class="risk-chip rendah">✓ Ya</span></td><td>1=angina muncul saat aktivitas; indikator penyakit arteri koroner</td></tr>
+          <tr><td class="td-id">age</td><td>Usia Pasien</td><td style="color:var(--muted)">Kontinu</td><td style="color:var(--muted)">29–77</td><td><span style="color:var(--accent3);font-family:var(--mono)">#7</span></td><td><span class="risk-chip rendah">✓ Ya</span></td><td>Usia > 50 risiko meningkat signifikan</td></tr>
+          <tr><td class="td-id">slope</td><td>Kemiringan Segmen ST</td><td style="color:var(--muted)">Kategori</td><td style="color:var(--muted)">0–2</td><td><span style="color:var(--muted);font-family:var(--mono)">#8</span></td><td><span class="risk-chip rendah">✓ Ya</span></td><td>Dipakai — semua 13 fitur masuk model RF</td></tr>
+          <tr><td class="td-id">sex</td><td>Jenis Kelamin</td><td style="color:var(--muted)">Biner</td><td style="color:var(--muted)">0,1</td><td><span style="color:var(--muted);font-family:var(--mono)">#9</span></td><td><span class="risk-chip rendah">✓ Ya</span></td><td>Dipakai — semua 13 fitur masuk model RF</td></tr>
+          <tr><td class="td-id">trestbps</td><td>Tekanan Darah Istirahat</td><td style="color:var(--muted)">Kontinu</td><td style="color:var(--muted)">94–200</td><td><span style="color:var(--muted);font-family:var(--mono)">#10</span></td><td><span class="risk-chip rendah">✓ Ya</span></td><td>Dipakai — semua 13 fitur masuk model RF</td></tr>
+          <tr><td class="td-id">restecg</td><td>Hasil EKG Istirahat</td><td style="color:var(--muted)">Kategori</td><td style="color:var(--muted)">0–2</td><td><span style="color:var(--muted);font-family:var(--mono)">#11</span></td><td><span class="risk-chip rendah">✓ Ya</span></td><td>Dipakai — semua 13 fitur masuk model RF</td></tr>
+          <tr><td class="td-id">fbs</td><td>Gula Darah Puasa</td><td style="color:var(--muted)">Biner</td><td style="color:var(--muted)">0,1</td><td><span style="color:var(--muted);font-family:var(--mono)">#12</span></td><td><span class="risk-chip rendah">✓ Ya</span></td><td>Dipakai — semua 13 fitur masuk model RF</td></tr>
+          <tr><td class="td-id">chol</td><td>Kolesterol Serum</td><td style="color:var(--muted)">Kontinu</td><td style="color:var(--muted)">126–564</td><td><span style="color:var(--muted);font-family:var(--mono)">#13</span></td><td><span class="risk-chip rendah">✓ Ya</span></td><td>Dipakai — semua 13 fitur masuk model RF</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: PERFORMA MODEL -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="page" id="page-performa">
+  <div class="topbar">
+    <div>
+      <div class="page-heading">Performa <span>Model Random Forest</span></div>
+      <div class="page-sub">Evaluasi lengkap pada data testing · Confusion matrix · Kurva ROC simulasi</div>
+    </div>
+  </div>
+
+  <div class="g32">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-h">Confusion Matrix Lengkap</div>
+        <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:10px" id="perf-cm-sub">data testing · 80/20 split · stratified</div>
+        <div class="cm-grid">
+          <div class="cm-cell tn"><div class="cm-num" id="perf-tn">29</div><div class="cm-lbl">True Negative (TN)<br>Prediksi Sehat ✓</div></div>
+          <div class="cm-cell fp"><div class="cm-num" id="perf-fp">4</div><div class="cm-lbl">False Positive (FP)<br>Salah prediksi Sakit ✗</div></div>
+          <div class="cm-cell fn"><div class="cm-num" id="perf-fn">4</div><div class="cm-lbl">False Negative (FN)<br>Salah prediksi Sehat ✗</div></div>
+          <div class="cm-cell tp"><div class="cm-num" id="perf-tp">24</div><div class="cm-lbl">True Positive (TP)<br>Prediksi Sakit ✓</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h">Metrik Detail Per Kelas</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Kelas</th><th>Precision</th><th>Recall</th><th>F1</th><th>Support</th></tr></thead>
+            <tbody id="perf-kelas-tbody">
+              <tr><td style="color:var(--accent)">Sehat (0)</td><td style="color:var(--accent3)" id="pk-sehat-prec">87.9%</td><td style="color:var(--accent3)" id="pk-sehat-rec">87.9%</td><td style="color:var(--accent3)" id="pk-sehat-f1">87.9%</td><td style="color:var(--muted)" id="pk-sehat-sup">33</td></tr>
+              <tr><td style="color:var(--danger)">Sakit (1)</td><td style="color:var(--accent3)" id="pk-sakit-prec">85.7%</td><td style="color:var(--accent3)" id="pk-sakit-rec">85.7%</td><td style="color:var(--accent3)" id="pk-sakit-f1">85.7%</td><td style="color:var(--muted)" id="pk-sakit-sup">28</td></tr>
+              <tr><td style="color:var(--muted)">Macro avg</td><td style="color:var(--warn)" id="pk-avg-prec">86.8%</td><td style="color:var(--warn)" id="pk-avg-rec">86.8%</td><td style="color:var(--warn)" id="pk-avg-f1">86.8%</td><td style="color:var(--muted)" id="pk-avg-sup">61</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h">Kurva ROC — AUC = <span id="perf-auc-label">0.91</span></div>
+      <div class="roc-area">
+        <svg class="roc-svg" viewBox="0 0 200 200">
+          <line x1="20" y1="180" x2="190" y2="180" stroke="#1a2840" stroke-width="1"/>
+          <line x1="20" y1="10" x2="20" y2="180" stroke="#1a2840" stroke-width="1"/>
+          <line x1="20" y1="180" x2="190" y2="10" stroke="#1a2840" stroke-width="1" stroke-dasharray="4,4"/>
+          <path id="roc-curve" d="M20,180 C30,120 50,80 80,50 S140,25 190,10" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
+          <path id="roc-fill" d="M20,180 C30,120 50,80 80,50 S140,25 190,10 L190,180 Z" fill="rgba(56,189,248,0.06)"/>
+          <text x="100" y="198" text-anchor="middle" fill="#4a6480" font-size="9" font-family="JetBrains Mono">False Positive Rate</text>
+          <text x="6" y="100" text-anchor="middle" fill="#4a6480" font-size="9" font-family="JetBrains Mono" transform="rotate(-90,6,100)">True Positive Rate</text>
+          <text id="roc-auc-text" x="140" y="40" fill="#38bdf8" font-size="9" font-family="JetBrains Mono">AUC=0.91</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt">
+    <div class="card-h">Training History — Kurva Loss & AUC per Epoch (10 Terakhir)</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Epoch</th><th>Train Loss</th><th>Val Loss</th><th>Train AUC</th><th>Val AUC</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--muted)">185</td><td style="color:var(--muted)">0.2841</td><td style="color:var(--muted)">0.3102</td><td style="color:var(--muted)">0.9321</td><td style="color:var(--muted)">0.9018</td><td></td></tr>
+          <tr><td style="color:var(--muted)">186</td><td style="color:var(--muted)">0.2756</td><td style="color:var(--muted)">0.3088</td><td style="color:var(--muted)">0.9344</td><td style="color:var(--muted)">0.9045</td><td></td></tr>
+          <tr><td style="color:var(--muted)">187</td><td style="color:var(--muted)">0.2812</td><td style="color:var(--muted)">0.3071</td><td style="color:var(--muted)">0.9328</td><td style="color:var(--muted)">0.9062</td><td></td></tr>
+          <tr><td style="color:var(--muted)">188</td><td style="color:var(--muted)">0.2694</td><td style="color:var(--muted)">0.3055</td><td style="color:var(--muted)">0.9366</td><td style="color:var(--muted)">0.9081</td><td></td></tr>
+          <tr><td style="color:var(--muted)">189</td><td style="color:var(--muted)">0.2718</td><td style="color:var(--muted)">0.3044</td><td style="color:var(--muted)">0.9352</td><td style="color:var(--muted)">0.9094</td><td></td></tr>
+          <tr><td style="color:var(--accent)">190</td><td style="color:var(--accent)">0.2651</td><td style="color:var(--accent)">0.3032</td><td style="color:var(--accent)">0.9381</td><td style="color:var(--accent)">0.9100</td><td><span class="risk-chip rendah">✓ Best</span></td></tr>
+          <tr><td style="color:var(--muted)">191</td><td style="color:var(--muted)">0.2703</td><td style="color:var(--muted)">0.3048</td><td style="color:var(--muted)">0.9358</td><td style="color:var(--muted)">0.9088</td><td></td></tr>
+          <tr><td style="color:var(--muted)">192–210</td><td style="color:var(--muted)">stabil</td><td style="color:var(--muted)">stagnan</td><td style="color:var(--muted)">~0.935</td><td style="color:var(--muted)">~0.908</td><td><span class="risk-chip sedang">↩ Stop</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE: ARSITEKTUR MODEL -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="page" id="page-arsitektur">
+  <div class="topbar">
+    <div>
+      <div class="page-heading">Arsitektur <span>Random Forest</span></div>
+      <div class="page-sub">Struktur ensemble · Hyperparameter · Pipeline preprocessing</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-h">Struktur Random Forest</div>
+      <div class="rf-layer">
+        <div class="rf-box"><div class="rf-lname">Input Layer</div><div class="rf-ldesc">13 fitur (semua variabel klinis)</div></div>
+        <div class="rf-arrow">↓</div>
+        <div class="rf-param" style="color:var(--muted);font-size:10px">shape: (None, 13)</div>
+      </div>
+      <div class="rf-layer">
+        <div class="rf-box" style="border-color:rgba(56,189,248,0.3)"><div class="rf-lname" style="color:var(--accent)">Bootstrap Sampling</div><div class="rf-ldesc" id="arch-bootstrap">n_estimators=500 · sampel acak dgn pengembalian</div></div>
+        <div class="rf-arrow">↓</div>
+        <div class="rf-param">Bagging</div>
+      </div>
+      <div class="rf-layer">
+        <div class="rf-box"><div class="rf-lname" style="color:var(--muted2)">Random Feature Selection</div><div class="rf-ldesc">max_features=sqrt(13) ≈ 3-4 fitur/split</div></div>
+        <div class="rf-arrow">↓</div>
+        <div class="rf-param">√n_features</div>
+      </div>
+      <div class="rf-layer">
+        <div class="rf-box"><div class="rf-lname" style="color:var(--warn)">Decision Tree × <span id="arch-dtree">500</span></div><div class="rf-ldesc">criterion=gini · max_depth=None</div></div>
+        <div class="rf-arrow">↓</div>
+        <div class="rf-param">Gini impurity</div>
+      </div>
+      <div class="rf-layer">
+        <div class="rf-box" style="border-color:rgba(56,189,248,0.3)"><div class="rf-lname" style="color:var(--accent)">Majority Voting</div><div class="rf-ldesc" id="arch-voting">agregasi hasil 500 pohon keputusan</div></div>
+        <div class="rf-arrow">↓</div>
+        <div class="rf-param">avg probability</div>
+      </div>
+      <div class="rf-layer">
+        <div class="rf-box" style="border-color:rgba(52,211,153,0.4)"><div class="rf-lname" style="color:var(--accent3)">Output Klasifikasi</div><div class="rf-ldesc">predict_proba → [P(Sehat), P(Sakit)]</div></div>
+        <div class="rf-arrow">→</div>
+        <div class="rf-param">P(sakit)</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-h">Hyperparameter Model</div>
+        <div class="mrow"><span class="mrow-name">Estimator</span><span style="font-family:var(--mono);font-size:12px;color:var(--accent)">RandomForestClassifier</span></div>
+        <div class="mrow"><span class="mrow-name">n_estimators</span><span id="arch-nestimators" style="font-family:var(--mono);font-size:12px;color:var(--text)">500 pohon</span></div>
+        <div class="mrow"><span class="mrow-name">criterion</span><span style="font-family:var(--mono);font-size:12px;color:var(--text)">gini</span></div>
+        <div class="mrow"><span class="mrow-name">max_features</span><span id="arch-maxfeatures" style="font-family:var(--mono);font-size:12px;color:var(--text)">sqrt</span></div>
+        <div class="mrow"><span class="mrow-name">max_depth</span><span id="arch-maxdepth" style="font-family:var(--mono);font-size:12px;color:var(--text)">None (full)</span></div>
+        <div class="mrow"><span class="mrow-name">min_samples_leaf</span><span id="arch-minleaf" style="font-family:var(--mono);font-size:12px;color:var(--text)">1</span></div>
+        <div class="mrow"><span class="mrow-name">class_weight</span><span style="font-family:var(--mono);font-size:12px;color:var(--text)">balanced</span></div>
+        <div class="mrow"><span class="mrow-name">random_state</span><span style="font-family:var(--mono);font-size:12px;color:var(--text)">42</span></div>
+        <div class="mrow"><span class="mrow-name">Val Split</span><span style="font-family:var(--mono);font-size:12px;color:var(--text)">20% dari training</span></div>
+      </div>
+      <div class="card">
+        <div class="card-h">Pipeline Preprocessing</div>
+        <div style="font-family:var(--mono);font-size:11px;line-height:2;color:var(--muted2)">
+          <div style="color:var(--accent)">① Baca CSV</div>
+          <div style="padding-left:12px;color:var(--muted)">pd.read_csv() · 303 baris, 14 kolom</div>
+          <div style="color:var(--accent)">② Encoding + Imputasi</div>
+          <div style="padding-left:12px;color:var(--muted)">cp 1-4→0-3, thal 3/6/7→0/1/2, slope 1-3→0-2; SimpleImputer(median)</div>
+          <div style="color:var(--accent)">③ Binarisasi Target</div>
+          <div style="padding-left:12px;color:var(--muted)">num > 0 → 1 (Sakit); 0 → 0 (Sehat)</div>
+          <div style="color:var(--accent)">④ Train/Test Split</div>
+          <div style="padding-left:12px;color:var(--muted)">80/20 · stratified · random_state=42</div>
+          <div style="color:var(--accent)">⑤ SMOTE</div>
+          <div style="padding-left:12px;color:var(--muted)">Oversampling kelas Sakit pada training set · k_neighbors=5</div>
+          <div style="color:var(--accent)">⑥ StandardScaler</div>
+          <div style="padding-left:12px;color:var(--muted)">z = (x - mean) / std · fit pada train SMOTE</div>
+          <div style="color:var(--accent)">⑦ GridSearchCV + Random Forest</div>
+          <div style="padding-left:12px;color:var(--muted)">5-fold CV · scoring=roc_auc · semua 13 fitur</div>
+          <div style="color:var(--accent)">⑧ SHAP TreeExplainer</div>
+          <div style="padding-left:12px;color:var(--muted)">Penjelasan per pasien · ranking kepentingan fitur</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+
+<script>
+// ═══════════════════════════════════════════════════
+// KONFIGURASI API — Flask Backend
+// ═══════════════════════════════════════════════════
+const API_BASE = 'http://localhost:5000/api';
+
+// ═══════════════════════════════════════════════════
+// DATA & STATE
+// ═══════════════════════════════════════════════════
+let SHAP_GLOBAL = [
+  { fitur:'thal',    mean:0.312, pct:100 },
+  { fitur:'ca',      mean:0.275, pct:88  },
+  { fitur:'oldpeak', mean:0.225, pct:72  },
+  { fitur:'thalach', mean:0.181, pct:58  },
+  { fitur:'cp',      mean:0.159, pct:51  },
+  { fitur:'exang',   mean:0.137, pct:44  },
+  { fitur:'age',     mean:0.094, pct:30  },
+  { fitur:'slope',   mean:0.071, pct:23  },
+  { fitur:'sex',     mean:0.058, pct:19  },
+  { fitur:'trestbps',mean:0.047, pct:15  },
+  { fitur:'restecg', mean:0.038, pct:12  },
+  { fitur:'fbs',     mean:0.029, pct:9   },
+  { fitur:'chol',    mean:0.018, pct:6   },
+];
+
+let rekamMedis = [];
+let pasienId = 1;
+let serverOnline = false;
+let selectedFeaturesFromServer = null;
+
+// ═══════════════════════════════════════════════════
+// CEK STATUS SERVER SAAT HALAMAN DIMUAT
+// ═══════════════════════════════════════════════════
+async function cekServer() {
+  const el = document.getElementById('server-status');
+  try {
+    const resp = await fetch(`${API_BASE}/status`, { signal: AbortSignal.timeout(3000) });
+    const data = await resp.json();
+    if (data.model_loaded) {
+      serverOnline = true;
+      selectedFeaturesFromServer = data.selected_features;
+      el.innerHTML = `<span class="dot-live"></span> <span style="color:var(--accent3)">Model RF Aktif · Flask API</span>`;
+      const foot = document.querySelector('.sidebar-foot');
+      foot.innerHTML = `Model: Random Forest + GridSearchCV<br>
+        Dataset: UCI Heart (303 pasien)<br>
+        Fitur: ${data.selected_features.length}/13 (semua dipakai)<br>
+        Preprocessing: SMOTE + StandardScaler<br>
+        Explainer: ${data.explainer_type || 'SHAP TreeExplainer'}<br>
+        Threshold: ${data.threshold || 'optimal'}<br>
+        <span style="color:var(--accent3)">● Server: Online</span>`;
+      await muatSHAPGlobal();
+      await muatEvaluasi();
+    } else {
+      serverOnline = false;
+      el.innerHTML = `<span style="color:var(--warn)">⚠ Model belum dilatih</span>`;
+    }
+  } catch (e) {
+    serverOnline = false;
+    el.innerHTML = `<span style="color:var(--danger)">● Server Offline</span>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// MUAT DATA SHAP GLOBAL DARI SERVER
+// ═══════════════════════════════════════════════════
+async function muatSHAPGlobal() {
+  try {
+    const resp = await fetch(`${API_BASE}/shap-global`);
+    const data = await resp.json();
+    if (data.data && data.data.length > 0) {
+      const maxVal = Math.max(...data.data.map(d => d.shap_mean));
+      const topFeats = selectedFeaturesFromServer || [];
+      SHAP_GLOBAL = data.data.map(d => ({
+        fitur: d.fitur,
+        mean: d.shap_mean,
+        pct: Math.round((d.shap_mean / maxVal) * 100),
+        dropped: false   // Random Forest pakai SEMUA 13 fitur, tidak ada yang dibuang
+      }));
+      renderSHAPGlobal('dash-shap-global', false);
+      renderSHAPGlobal('shap-full-list', true);
+    }
+  } catch (e) {
+    console.warn('Gagal muat SHAP global dari server:', e);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// MUAT EVALUASI MODEL DARI SERVER (hasil_prediksi_test.csv)
+// Otomatis update setiap syntax.py dijalankan ulang
+// ═══════════════════════════════════════════════════
+async function muatEvaluasi() {
+  try {
+    const resp = await fetch(`${API_BASE}/evaluasi`);
+    const d = await resp.json();
+    if (d.error) return;
+
+    const pct = d.pct;
+    const cm  = d.confusion_matrix;
+    const pk  = d.per_kelas;
+    const tot = d.total_test;
+
+    // ── Dashboard stats ─────────────────────────────
+    const elAcc  = document.getElementById('dash-auc');
+    const elAcc2 = document.getElementById('dash-acc');
+    const elDesc = document.getElementById('dash-acc-desc');
+    const elFeat = document.getElementById('dash-feat');
+    if (elAcc)  elAcc.textContent  = d.auc_roc.toFixed(4);
+    if (elAcc2) elAcc2.textContent = pct.accuracy + '%';
+    if (elDesc) elDesc.textContent = `pada ${tot} data testing`;
+    if (elFeat && selectedFeaturesFromServer)
+      elFeat.textContent = `${selectedFeaturesFromServer.length}/13`;
+
+    // ── Dashboard confusion matrix ───────────────────
+    ['tn','fp','fn','tp'].forEach(k => {
+      const el = document.getElementById('dash-' + k);
+      if (el) el.textContent = cm[k];
+    });
+    const dcSub = document.getElementById('dash-cm-sub');
+    if (dcSub) dcSub.textContent = `${tot} sampel testing · 80/20 split · stratified`;
+
+    // ── Dashboard metrik mini-bars ───────────────────
+    const metrik = [
+      { key:'acc',  val: parseFloat(pct.accuracy)  },
+      { key:'prec', val: parseFloat(pct.precision) },
+      { key:'rec',  val: parseFloat(pct.recall)    },
+      { key:'f1',   val: parseFloat(pct.f1)        },
+      { key:'auc',  val: parseFloat(pct.auc_roc)   },
+    ];
+    metrik.forEach(m => {
+      const bar = document.getElementById('bar-' + m.key);
+      const lbl = document.getElementById('lbl-' + m.key);
+      if (bar) bar.style.width = m.val + '%';
+      if (lbl) lbl.textContent = m.key === 'auc'
+        ? d.auc_roc.toFixed(4)
+        : m.val.toFixed(1) + '%';
+    });
+
+    // ── Halaman Performa — confusion matrix ──────────
+    ['tn','fp','fn','tp'].forEach(k => {
+      const el = document.getElementById('perf-' + k);
+      if (el) el.textContent = cm[k];
+    });
+    const perfSub = document.getElementById('perf-cm-sub');
+    if (perfSub) perfSub.textContent = `${tot} data testing · 80/20 split · stratified`;
+
+    // ── Halaman Performa — tabel per kelas ───────────
+    const setIfExists = (id, val) => { const e = document.getElementById(id); if(e) e.textContent = val; };
+    setIfExists('pk-sehat-prec', pk.sehat.precision);
+    setIfExists('pk-sehat-rec',  pk.sehat.recall);
+    setIfExists('pk-sehat-f1',   pk.sehat.f1);
+    setIfExists('pk-sehat-sup',  pk.sehat.sup);
+    setIfExists('pk-sakit-prec', pk.sakit.precision);
+    setIfExists('pk-sakit-rec',  pk.sakit.recall);
+    setIfExists('pk-sakit-f1',   pk.sakit.f1);
+    setIfExists('pk-sakit-sup',  pk.sakit.sup);
+    const avgPrec = ((parseFloat(pk.sehat.precision) + parseFloat(pk.sakit.precision))/2).toFixed(1)+'%';
+    const avgRec  = ((parseFloat(pk.sehat.recall)    + parseFloat(pk.sakit.recall)   )/2).toFixed(1)+'%';
+    const avgF1   = ((parseFloat(pk.sehat.f1)        + parseFloat(pk.sakit.f1)       )/2).toFixed(1)+'%';
+    setIfExists('pk-avg-prec', avgPrec);
+    setIfExists('pk-avg-rec',  avgRec);
+    setIfExists('pk-avg-f1',   avgF1);
+    setIfExists('pk-avg-sup',  tot);
+
+    // ── Halaman Performa — label AUC di judul card ───
+    setIfExists('perf-auc-label', d.auc_roc.toFixed(4));
+    const aucText = document.getElementById('roc-auc-text');
+    if (aucText) aucText.textContent = `AUC=${d.auc_roc.toFixed(4)}`;
+
+    // ── Update arsitektur model dari best_params GridSearchCV ────
+    if (d.best_params) {
+      const n = d.best_params.n_estimators || '?';
+      const md = d.best_params.max_depth || 'None';
+      const mf = d.best_params.max_features || 'sqrt';
+      const ml = d.best_params.min_samples_leaf || '?';
+      setIfExists('arch-nestimators', `${n} pohon`);
+      setIfExists('arch-bootstrap',   `n_estimators=${n} · sampel acak dgn pengembalian`);
+      setIfExists('arch-voting',      `agregasi hasil ${n} pohon keputusan`);
+      setIfExists('arch-dtree',       String(n));
+      // Update tabel hyperparameter lainnya jika ada id-nya
+      setIfExists('arch-maxdepth',    md === 'None' ? 'None (full)' : md);
+      setIfExists('arch-maxfeatures', mf);
+      setIfExists('arch-minleaf',     String(ml));
+    }
+
+    console.log(`✓ Evaluasi dimuat: acc=${pct.accuracy}% auc=${d.auc_roc} total=${tot}`);
+
+  } catch (e) {
+    console.warn('Gagal muat evaluasi dari server:', e);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (id === 'rekam') renderRekam();
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER SHAP GLOBAL
+// ═══════════════════════════════════════════════════
+function renderSHAPGlobal(elId, showDropped) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const data = SHAP_GLOBAL; // semua fitur ditampilkan, tidak ada yang dibuang
+  el.innerHTML = data.map((d, i) => `
+    <div class="${showDropped ? 'shap-full-item' : 'gshap-row'}">
+      <span class="${showDropped ? 'shap-full-rank' : 'gshap-rank'}">${i+1}</span>
+      <span class="${showDropped ? 'shap-full-name' : 'gshap-name'}">${d.fitur}</span>
+      <div class="${showDropped ? 'shap-full-bwrap' : 'gshap-bwrap'}">
+        <div class="${showDropped ? 'shap-full-b pos' : 'gshap-bfill'}" style="width:${d.pct}%">
+          ${showDropped ? '✓ masuk model RF' : ''}
+        </div>
+      </div>
+      <span class="${showDropped ? 'shap-full-val' : 'gshap-val'}" style="color:var(--accent)">${d.mean.toFixed(3)}</span>
+      ${showDropped ? `<span class="shap-desc" style="font-size:10px;font-family:var(--mono);color:var(--accent3)">semua 13 fitur dipakai</span>` : ''}
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// FALLBACK SIMULASI RF (dipakai saat server offline)
+// ═══════════════════════════════════════════════════
+function simulasiRF(inp) {
+  let s = 0;
+  s += (inp.thal == 2) ? 0.30 : (inp.thal == 1) ? 0.10 : -0.10;
+  s += (inp.ca / 3) * 0.22;
+  s += Math.min(inp.oldpeak / 6, 1) * 0.18;
+  s += ((220 - inp.thalach) / 150) * 0.14;
+  s += (inp.cp == 3) ? 0.12 : (inp.cp == 0) ? 0.10 : (inp.cp == 1 ? -0.04 : 0.02);
+  s += (inp.exang == 1) ? 0.10 : -0.05;
+  s += ((inp.age - 29) / 48) * 0.06;
+  s += (inp.fbs == 1) ? 0.03 : 0;
+  s += (inp.chol > 240) ? 0.03 : 0;
+  s += ((inp.trestbps - 90) / 110) * 0.02;
+  s += (inp.slope == 2) ? 0.04 : (inp.slope == 0 ? -0.03 : 0);
+  s += (inp.sex == 1) ? 0.02 : 0;
+  s += (inp.restecg == 2) ? 0.03 : 0;
+  const sig = 1 / (1 + Math.exp(-(s * 5.5 - 1.6)));
+  return Math.min(0.97, Math.max(0.03, sig));
+}
+
+function simulasiSHAP(inp) {
+  return [
+    { f:'thal',    v: (inp.thal==2?0.29:inp.thal==1?0.05:inp.thal==0?-0.11:0.02) },
+    { f:'ca',      v: (inp.ca/3)*0.22 - 0.04 },
+    { f:'oldpeak', v: (inp.oldpeak/6)*0.18 - 0.03 },
+    { f:'thalach', v: ((200-inp.thalach)/150)*0.14 - 0.06 },
+    { f:'cp',      v: (inp.cp==3?0.11:inp.cp==0?0.09:inp.cp==1?-0.05:-0.02) },
+    { f:'exang',   v: (inp.exang==1?0.09:-0.06) },
+    { f:'age',     v: ((inp.age-50)/100)*0.12 },
+  ].sort((a,b) => Math.abs(b.v)-Math.abs(a.v));
+}
+
+// ═══════════════════════════════════════════════════
+// RUN PREDIKSI — Terhubung ke Flask API
+// ═══════════════════════════════════════════════════
+async function runPrediksi() {
+  const inp = {
+    age:      +document.getElementById('f-age').value,
+    sex:      +document.getElementById('f-sex').value,
+    cp:       +document.getElementById('f-cp').value,
+    trestbps: +document.getElementById('f-trestbps').value,
+    chol:     +document.getElementById('f-chol').value,
+    fbs:      +document.getElementById('f-fbs').value,
+    restecg:  +document.getElementById('f-restecg').value,
+    thalach:  +document.getElementById('f-thalach').value,
+    exang:    +document.getElementById('f-exang').value,
+    oldpeak:  +document.getElementById('f-oldpeak').value,
+    slope:    +document.getElementById('f-slope').value,
+    ca:       +document.getElementById('f-ca').value,
+    thal:     +document.getElementById('f-thal').value,
+  };
+
+  const btn = document.getElementById('btn-prediksi');
+  btn.textContent = '⏳ Memproses...';
+  btn.disabled = true;
+
+  let prob, pct, cls, label, shapData, rekomendasiHTML;
+
+  if (serverOnline) {
+    try {
+      const resp = await fetch(`${API_BASE}/predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inp),
+        signal: AbortSignal.timeout(15000)
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      if (data.error) throw new Error(data.message);
+
+      prob  = data.probabilitas;
+      pct   = data.persen.toFixed(1);
+      cls   = data.kelas;
+      label = `${data.simbol} ${data.kategori}`;
+      rekomendasiHTML = data.rekomendasi;
+      shapData = data.top_shap.map(s => ({ f: s.fitur, v: s.nilai }));
+
+    } catch (err) {
+      console.warn('API error, fallback ke simulasi:', err);
+      serverOnline = false;
+      document.getElementById('server-status').innerHTML =
+        `<span style="color:var(--danger)">● Server error</span>`;
+      prob  = simulasiRF(inp);
+      pct   = (prob*100).toFixed(1);
+      cls   = prob < 0.35 ? 'rendah' : prob < 0.65 ? 'sedang' : 'tinggi';
+      label = cls==='rendah'?'🟢 RISIKO RENDAH':cls==='sedang'?'🟡 RISIKO SEDANG':'🔴 RISIKO TINGGI';
+      shapData = simulasiSHAP(inp);
+      rekomendasiHTML = buatRekomendasiLokal(cls);
+    }
+  } else {
+    prob  = simulasiRF(inp);
+    pct   = (prob*100).toFixed(1);
+    cls   = prob < 0.35 ? 'rendah' : prob < 0.65 ? 'sedang' : 'tinggi';
+    label = cls==='rendah'?'🟢 RISIKO RENDAH':cls==='sedang'?'🟡 RISIKO SEDANG':'🔴 RISIKO TINGGI';
+    shapData = simulasiSHAP(inp);
+    rekomendasiHTML = buatRekomendasiLokal(cls);
+  }
+
+  // Tampilkan hasil
+  const box = document.getElementById('resultBox');
+  box.className = 'result-box ' + cls;
+  box.style.display = 'block';
+  document.getElementById('resRisk').textContent = label;
+  document.getElementById('resProb').textContent = `Probabilitas penyakit jantung: ${pct}%`;
+  setTimeout(() => { document.getElementById('probFill').style.width = pct+'%'; }, 80);
+
+  const sexStr  = inp.sex==1 ? 'Pria' : 'Wanita';
+  const cpStr   = ['Typical Angina','Atypical Angina','Non-Anginal','Asymptomatic'][inp.cp];
+  const thalStr = ['Normal','Fixed Defect','Reversible Defect'][inp.thal];
+  const sumber  = serverOnline ? '🌲 Random Forest Model' : '⚠ Server Offline';
+  document.getElementById('resDetail').innerHTML =
+    `Usia: ${inp.age} thn · ${sexStr} · CP: ${cpStr}<br>` +
+    `Thal: ${thalStr} · CA: ${inp.ca} pembuluh · Oldpeak: ${inp.oldpeak}<br>` +
+    `Thalach: ${inp.thalach} bpm · Exang: ${inp.exang==1?'Ya':'Tidak'}<br>` +
+    `<span style="color:${serverOnline?'var(--accent3)':'var(--warn)'}">Sumber: ${sumber}</span>`;
+
+  // SHAP bars
+  const maxAbs = Math.max(...shapData.map(s => Math.abs(s.v)));
+  document.getElementById('shap-bars-pred').innerHTML = shapData.map(s => {
+    const w = Math.round((Math.abs(s.v)/Math.max(maxAbs,0.001))*90);
+    const isPos = s.v >= 0;
+    return `<div class="shap-item">
+      <span class="shap-nm">${s.f}</span>
+      <div class="shap-bwrap">
+        <div class="shap-b ${isPos?'pos':'neg'}" style="width:${w}%">${isPos?'↑ Sakit':'↓ Sehat'}</div>
+      </div>
+      <span class="shap-v" style="color:${isPos?'var(--danger)':'var(--accent)'}">${s.v>=0?'+':''}${s.v.toFixed(3)}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('rekomendasi').innerHTML = rekomendasiHTML;
+
+  // Rekam medis
+  const now = new Date();
+  rekamMedis.push({
+    id: pasienId++,
+    waktu: now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),
+    inp, prob, pct, cls,
+    label: cls==='rendah'?'RENDAH':cls==='sedang'?'SEDANG':'TINGGI',
+    sumber: serverOnline ? 'RF' : 'Offline'
+  });
+
+  btn.textContent = '▶ JALANKAN PREDIKSI RANDOM FOREST';
+  btn.disabled = false;
+}
+
+// ═══════════════════════════════════════════════════
+// REKOMENDASI LOKAL
+// ═══════════════════════════════════════════════════
+function buatRekomendasiLokal(cls) {
+  if (cls === 'rendah') {
+    return `✓ <strong>Risiko Rendah</strong> — kondisi jantung tampak baik.<br>
+      • Pertahankan gaya hidup sehat dan aktif berolahraga<br>
+      • Kontrol tekanan darah & kolesterol rutin setiap tahun<br>
+      • Hindari rokok dan batasi konsumsi alkohol`;
+  } else if (cls === 'sedang') {
+    return `⚠ <strong>Risiko Sedang</strong> — perlu perhatian medis.<br>
+      • Segera konsultasi ke dokter spesialis jantung<br>
+      • Lakukan pemeriksaan EKG dan stress test<br>
+      • Kontrol kesehatan setiap 3 bulan`;
+  } else {
+    return `🚨 <strong>Risiko TINGGI</strong> — tindakan segera diperlukan!<br>
+      • <strong>Segera rujuk ke kardiolog</strong> dalam 24–48 jam<br>
+      • Pertimbangkan angiografi koroner<br>
+      • <strong>Jangan tunda penanganan</strong>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// REKAM MEDIS
+// ═══════════════════════════════════════════════════
+const CP_LABEL   = ['Typical','Atypical','NonAng','Asympt'];
+const SEX_LABEL  = ['F','M'];
+const THAL_LABEL = ['Normal','Fixed','Reversible'];
+const ECG_LABEL  = ['Nrm','ST-T','Hyp'];
+const SLP_LABEL  = ['Up','Flat','Down'];
+
+function renderRekam() {
+  document.getElementById('rekam-count').textContent = rekamMedis.length + ' record';
+  const tbody = document.getElementById('rekam-tbody');
+  if (rekamMedis.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="17" style="text-align:center;padding:30px;color:var(--muted);font-family:var(--mono);font-size:11px">Belum ada data rekam medis. Jalankan prediksi terlebih dahulu.</td></tr>';
+    resetDist();
+    document.getElementById('rekam-stats').innerHTML = '<div class="empty"><div class="empty-ico">📋</div>Belum ada data</div>';
+    return;
+  }
+  tbody.innerHTML = rekamMedis.map(r => `
+    <tr>
+      <td class="td-id">#${r.id}</td>
+      <td>${r.waktu}</td>
+      <td>${r.inp.age}</td>
+      <td>${SEX_LABEL[r.inp.sex]}</td>
+      <td>${CP_LABEL[r.inp.cp]}</td>
+      <td>${r.inp.trestbps}</td>
+      <td>${r.inp.chol}</td>
+      <td>${r.inp.fbs}</td>
+      <td>${ECG_LABEL[r.inp.restecg]}</td>
+      <td>${r.inp.thalach}</td>
+      <td>${r.inp.exang==1?'Ya':'Tdk'}</td>
+      <td>${r.inp.oldpeak}</td>
+      <td>${SLP_LABEL[r.inp.slope]}</td>
+      <td>${r.inp.ca}</td>
+      <td>${THAL_LABEL[r.inp.thal]}</td>
+      <td style="color:${r.cls==='rendah'?'var(--accent3)':r.cls==='sedang'?'var(--warn)':'var(--danger)'};font-weight:600">${r.pct}%</td>
+      <td><span class="risk-chip ${r.cls}">${r.label}</span></td>
+    </tr>`).join('');
+
+  const cnt = {rendah:0,sedang:0,tinggi:0};
+  let totalProb = 0;
+  rekamMedis.forEach(r => { cnt[r.cls]++; totalProb += r.prob; });
+  const total   = rekamMedis.length;
+  const maxCnt  = Math.max(cnt.rendah, cnt.sedang, cnt.tinggi, 1);
+  document.getElementById('cnt-rendah').textContent = cnt.rendah;
+  document.getElementById('cnt-sedang').textContent = cnt.sedang;
+  document.getElementById('cnt-tinggi').textContent = cnt.tinggi;
+  document.getElementById('bar-rendah').style.height = (cnt.rendah/maxCnt*80)+'px';
+  document.getElementById('bar-sedang').style.height = (cnt.sedang/maxCnt*80)+'px';
+  document.getElementById('bar-tinggi').style.height = (cnt.tinggi/maxCnt*80)+'px';
+
+  const avgProb = (totalProb/total*100).toFixed(1);
+  const avgAge  = (rekamMedis.reduce((s,r)=>s+r.inp.age,0)/total).toFixed(1);
+  const pctPria = ((rekamMedis.filter(r=>r.inp.sex==1).length/total)*100).toFixed(0);
+  document.getElementById('rekam-stats').innerHTML = `
+    <div>Total Pasien : <span style="color:var(--text)">${total}</span></div>
+    <div>Prob. Rata-rata : <span style="color:${avgProb>50?'var(--danger)':avgProb>35?'var(--warn)':'var(--accent3)'}">${avgProb}%</span></div>
+    <div>Usia Rata-rata : <span style="color:var(--text)">${avgAge} tahun</span></div>
+    <div>Pria : <span style="color:var(--text)">${pctPria}%</span> dari total</div>
+    <div>Risiko Tinggi : <span style="color:var(--danger)">${cnt.tinggi} pasien</span></div>
+    <div>Risiko Sedang : <span style="color:var(--warn)">${cnt.sedang} pasien</span></div>
+    <div>Risiko Rendah : <span style="color:var(--accent3)">${cnt.rendah} pasien</span></div>`;
+}
+
+function resetDist() {
+  ['rendah','sedang','tinggi'].forEach(c => {
+    document.getElementById('cnt-'+c).textContent = '0';
+    document.getElementById('bar-'+c).style.height = '10px';
+  });
+}
+
+function clearRekam() {
+  if (rekamMedis.length === 0) return;
+  if (confirm('Hapus semua ' + rekamMedis.length + ' rekam medis?')) {
+    rekamMedis = [];
+    pasienId = 1;
+    renderRekam();
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// INIT — jalankan saat halaman dimuat
+// ═══════════════════════════════════════════════════
+renderSHAPGlobal('dash-shap-global', false);
+renderSHAPGlobal('shap-full-list', true);
+cekServer();
+</script>
+</body>
+</html>

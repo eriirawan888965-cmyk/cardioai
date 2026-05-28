@@ -88,23 +88,25 @@ def load_model():
 
 
 # ================================================================
-# HELPER — One-Hot Encode input sesuai feature_cols dari syntax.py
+# LOAD MODEL SAAT STARTUP (fix untuk Railway/Gunicorn)
+# ================================================================
+
+with app.app_context():
+    load_model()
+
+
+# ================================================================
+# HELPER — Preprocessing input sesuai syntax.py
 #
-# syntax.py melakukan:
-#   CAT_COLS = ['cp', 'thal', 'slope']
-#   df_ohe = pd.get_dummies(df_clean, columns=CAT_COLS, drop_first=False)
+# syntax.py TIDAK pakai One-Hot Encoding.
+# Fitur langsung dipakai sebagai 13 kolom numerik asli:
+#   age, sex, cp, trestbps, chol, fbs, restecg,
+#   thalach, exang, oldpeak, slope, ca, thal
 #
-# Sehingga kolom yang dihasilkan adalah:
-#   cp_0, cp_1, cp_2, cp_3
-#   thal_0, thal_1, thal_2
-#   slope_0, slope_1, slope_2
-#
-# Sebelum OHE, syntax.py juga menggeser nilai:
-#   cp   : dikurangi 1 jika max == 4  → nilai 1-4 menjadi 0-3
-#   thal : di-map {3.0:0, 6.0:1, 7.0:2}
-#          NAMUN input dari HTML sudah 0/1/2, jadi tidak perlu di-map ulang
-#   slope: dikurangi 1 jika min == 1  → nilai 1-3 menjadi 0-2
-#          Input dari HTML sudah 0/1/2, jadi tidak perlu di-shift
+# Mapping yang sudah dilakukan di HTML form:
+#   cp   : nilai 0-3  (sudah dishift dari 1-4)
+#   thal : nilai 0-2  (0=Normal, 1=Fixed Defect, 2=Reversible Defect)
+#   slope: nilai 0-2  (sudah dishift dari 1-3)
 # ================================================================
 
 def preprocess_input(raw: dict) -> np.ndarray:
@@ -113,38 +115,22 @@ def preprocess_input(raw: dict) -> np.ndarray:
     kembalikan array numpy siap dimasukkan ke model.
     """
 
-    # ── Fitur numerik (langsung dipakai) ─────────────────────────
+    # ── 13 fitur asli tanpa OHE (sesuai syntax.py) ───────────────
     row = {
-        'age'     : float(raw.get('age', 0)),
-        'sex'     : float(raw.get('sex', 0)),
+        'age'     : float(raw.get('age',      0)),
+        'sex'     : float(raw.get('sex',      0)),
+        'cp'      : float(raw.get('cp',       0)),
         'trestbps': float(raw.get('trestbps', 0)),
-        'chol'    : float(raw.get('chol', 0)),
-        'fbs'     : float(raw.get('fbs', 0)),
-        'restecg' : float(raw.get('restecg', 0)),
-        'thalach' : float(raw.get('thalach', 0)),
-        'exang'   : float(raw.get('exang', 0)),
-        'oldpeak' : float(raw.get('oldpeak', 0)),
-        'ca'      : float(raw.get('ca', 0)),
+        'chol'    : float(raw.get('chol',     0)),
+        'fbs'     : float(raw.get('fbs',      0)),
+        'restecg' : float(raw.get('restecg',  0)),
+        'thalach' : float(raw.get('thalach',  0)),
+        'exang'   : float(raw.get('exang',    0)),
+        'oldpeak' : float(raw.get('oldpeak',  0)),
+        'slope'   : float(raw.get('slope',    0)),
+        'ca'      : float(raw.get('ca',       0)),
+        'thal'    : float(raw.get('thal',     0)),
     }
-
-    # ── One-Hot Encode: cp (0–3) ──────────────────────────────────
-    cp_val = int(raw.get('cp', 0))
-    for i in range(4):
-        row[f'cp_{i}'] = 1.0 if cp_val == i else 0.0
-
-    # ── One-Hot Encode: thal (0–2) ────────────────────────────────
-    # HTML kirim 0=Normal, 1=Fixed Defect, 2=Reversible Defect
-    # sudah sesuai dengan hasil thal_map di syntax.py
-    thal_val = int(raw.get('thal', 0))
-    for i in range(3):
-        row[f'thal_{i}'] = 1.0 if thal_val == i else 0.0
-
-    # ── One-Hot Encode: slope (0–2) ───────────────────────────────
-    # HTML kirim 0=Upsloping, 1=Flat, 2=Downsloping
-    # sudah sesuai, tidak perlu shift
-    slope_val = int(raw.get('slope', 0))
-    for i in range(3):
-        row[f'slope_{i}'] = 1.0 if slope_val == i else 0.0
 
     # ── Susun DataFrame sesuai urutan feature_cols ───────────────
     df = pd.DataFrame([row])
@@ -262,8 +248,6 @@ def api_evaluasi():
     with open(METRIK_PATH) as f:
         m = json.load(f)
 
-    # Hitung per-kelas dari metrik (sklearn classification_report-like)
-    # Dari metrik.json kita punya: tn, fp, fn, tp, precision, recall, f1
     tn  = m.get('tn', 0)
     fp  = m.get('fp', 0)
     fn  = m.get('fn', 0)
@@ -271,7 +255,6 @@ def api_evaluasi():
 
     total_test = m.get('total_test', tn + fp + fn + tp)
 
-    # Per-kelas precision / recall / f1
     prec_sakit = m.get('precision', 0)
     rec_sakit  = m.get('recall',    0)
     f1_sakit   = m.get('f1',        0)
@@ -338,11 +321,11 @@ def api_predict():
     try:
         raw = request.get_json()
 
-        # ── Preprocessing (OHE + impute + scale) ─────────────────
+        # ── Preprocessing (13 fitur asli + impute + scale) ───────
         input_scaled = preprocess_input(raw)
 
         # ── Prediksi ──────────────────────────────────────────────
-        prob  = float(model.predict_proba(input_scaled)[0][1])
+        prob   = float(model.predict_proba(input_scaled)[0][1])
         persen = round(prob * 100, 2)
 
         # ── Label risiko ──────────────────────────────────────────
@@ -416,5 +399,4 @@ def api_predict():
 # ================================================================
 
 if __name__ == '__main__':
-    load_model()
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)

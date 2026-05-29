@@ -19,6 +19,13 @@
   },
   "cv_auc_mean": 0.9053,
   "cv_auc_std": 0.025,
+  "cv_fold_scores": [
+    0.8896,
+    0.9535,
+    0.9015,
+    0.899,
+    0.8828
+  ],
   "model": "RandomForest + GridSearchCV + SHAP",
   "n_features": 13,
   "feature_cols": [

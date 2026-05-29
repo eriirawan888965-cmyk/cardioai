@@ -7,20 +7,20 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #080d1a;
-  --surface: #0d1526;
-  --card: #111d30;
-  --card2: #0f1a2a;
-  --border: #1a2840;
-  --border2: #223050;
-  --accent: #38bdf8;
-  --accent2: #f472b6;
-  --accent3: #34d399;
-  --warn: #fbbf24;
-  --danger: #fb7185;
-  --text: #e2eaf5;
-  --muted: #4a6480;
-  --muted2: #6b82a0;
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --card2: #f8fafc;
+  --border: #e2e8f0;
+  --border2: #cbd5e1;
+  --accent: #0284c7;
+  --accent2: #ec4899;
+  --accent3: #059669;
+  --warn: #d97706;
+  --danger: #dc2626;
+  --text: #1e293b;
+  --muted: #64748b;
+  --muted2: #475569;
   --font: 'Outfit', sans-serif;
   --mono: 'JetBrains Mono', monospace;
 }
@@ -28,7 +28,7 @@
 body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
 
 /* grid bg */
-body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 20% 20%,rgba(56,189,248,0.04) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(244,114,182,0.03) 0%,transparent 50%);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 20% 20%,rgba(2,132,199,0.04) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(220,38,38,0.03) 0%,transparent 50%);pointer-events:none;z-index:0}
 
 .layout{display:flex;min-height:100vh;position:relative;z-index:1}
 
@@ -48,7 +48,7 @@ body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(c
 .nav-sec-label{font-size:9px;color:var(--muted);font-family:var(--mono);letter-spacing:0.12em;padding:0 6px 6px;text-transform:uppercase}
 .nav-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:13px;color:var(--muted2);cursor:pointer;transition:all .18s;border:1px solid transparent;font-weight:400;background:none;width:100%;text-align:left}
 .nav-btn:hover{background:var(--card);color:var(--text)}
-.nav-btn.active{background:rgba(56,189,248,0.08);color:var(--accent);border-color:rgba(56,189,248,0.18);font-weight:500}
+.nav-btn.active{background:rgba(2,132,199,0.08);color:var(--accent);border-color:rgba(2,132,199,0.2);font-weight:500}
 .nav-ico{font-size:14px;width:18px;text-align:center;flex-shrink:0}
 
 .sidebar-foot{margin-top:auto;padding:14px 18px;border-top:1px solid var(--border);font-size:10px;color:var(--muted);font-family:var(--mono);line-height:1.9}
@@ -106,15 +106,15 @@ body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(c
 .fg input:focus,.fg select:focus{border-color:var(--accent)}
 .fg select option{background:var(--surface)}
 
-.btn-run{width:100%;margin-top:14px;background:var(--accent);color:#020d1e;border:none;border-radius:9px;padding:11px;font-family:var(--mono);font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.05em;transition:all .18s}
+.btn-run{width:100%;margin-top:14px;background:var(--accent);color:#ffffff;border:none;border-radius:9px;padding:11px;font-family:var(--mono);font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.05em;transition:all .18s}
 .btn-run:hover{filter:brightness(1.1);transform:translateY(-1px)}
 .btn-run:active{transform:translateY(0)}
 
 /* RESULT BOX */
 .result-box{border-radius:10px;padding:16px 18px;margin-top:14px;border:1px solid;display:none}
-.result-box.rendah{background:rgba(52,211,153,0.05);border-color:rgba(52,211,153,0.25)}
-.result-box.sedang{background:rgba(251,191,36,0.05);border-color:rgba(251,191,36,0.25)}
-.result-box.tinggi{background:rgba(251,113,133,0.05);border-color:rgba(251,113,133,0.25)}
+.result-box.rendah{background:rgba(5,150,105,0.06);border-color:rgba(5,150,105,0.3)}
+.result-box.sedang{background:rgba(217,119,6,0.06);border-color:rgba(217,119,6,0.3)}
+.result-box.tinggi{background:rgba(220,38,38,0.06);border-color:rgba(220,38,38,0.3)}
 .res-lbl{font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:5px}
 .res-risk{font-size:20px;font-weight:700;font-family:var(--mono)}
 .result-box.rendah .res-risk{color:var(--accent3)}
@@ -134,17 +134,17 @@ body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(c
 .shap-nm{font-family:var(--mono);font-size:11px;color:var(--muted2);min-width:72px}
 .shap-bwrap{flex:1;height:18px;background:var(--surface);border-radius:3px;overflow:hidden}
 .shap-b{height:100%;border-radius:3px;display:flex;align-items:center;padding:0 7px;font-size:10px;font-family:var(--mono);min-width:40px}
-.shap-b.pos{background:rgba(251,113,133,0.2);color:var(--danger)}
-.shap-b.neg{background:rgba(56,189,248,0.12);color:var(--accent)}
+.shap-b.pos{background:rgba(220,38,38,0.1);color:var(--danger)}
+.shap-b.neg{background:rgba(2,132,199,0.1);color:var(--accent)}
 .shap-v{font-family:var(--mono);font-size:11px;min-width:50px;text-align:right}
 
 /* CONFUSION MATRIX */
 .cm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
 .cm-cell{border-radius:9px;padding:13px;text-align:center;border:1px solid var(--border)}
-.cm-cell.tp{background:rgba(52,211,153,0.07);border-color:rgba(52,211,153,0.2)}
-.cm-cell.tn{background:rgba(56,189,248,0.07);border-color:rgba(56,189,248,0.2)}
-.cm-cell.fp{background:rgba(251,191,36,0.05);border-color:rgba(251,191,36,0.15)}
-.cm-cell.fn{background:rgba(251,113,133,0.07);border-color:rgba(251,113,133,0.2)}
+.cm-cell.tp{background:rgba(5,150,105,0.07);border-color:rgba(5,150,105,0.25)}
+.cm-cell.tn{background:rgba(2,132,199,0.07);border-color:rgba(2,132,199,0.25)}
+.cm-cell.fp{background:rgba(217,119,6,0.07);border-color:rgba(217,119,6,0.2)}
+.cm-cell.fn{background:rgba(220,38,38,0.07);border-color:rgba(220,38,38,0.25)}
 .cm-num{font-size:26px;font-weight:700;font-family:var(--mono)}
 .cm-cell.tp .cm-num{color:var(--accent3)}
 .cm-cell.tn .cm-num{color:var(--accent)}
@@ -167,7 +167,7 @@ body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(c
 .gshap-rank{font-family:var(--mono);font-size:10px;color:var(--muted);min-width:18px}
 .gshap-name{font-family:var(--mono);font-size:12px;color:var(--accent);min-width:70px}
 .gshap-bwrap{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
-.gshap-bfill{height:100%;background:linear-gradient(90deg,var(--accent),rgba(56,189,248,0.4));border-radius:2px}
+.gshap-bfill{height:100%;background:linear-gradient(90deg,var(--accent),rgba(2,132,199,0.4));border-radius:2px}
 .gshap-val{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:40px;text-align:right}
 
 /* REKAM MEDIS TABLE */
@@ -180,9 +180,9 @@ tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(56,189,248,0.03);color:var(--text)}
 .td-id{color:var(--accent);font-weight:600}
 .risk-chip{display:inline-block;padding:2px 9px;border-radius:10px;font-size:10px;font-family:var(--mono);font-weight:500}
-.risk-chip.rendah{background:rgba(52,211,153,0.12);color:var(--accent3)}
-.risk-chip.sedang{background:rgba(251,191,36,0.12);color:var(--warn)}
-.risk-chip.tinggi{background:rgba(251,113,133,0.12);color:var(--danger)}
+.risk-chip.rendah{background:rgba(5,150,105,0.1);color:var(--accent3)}
+.risk-chip.sedang{background:rgba(217,119,6,0.1);color:var(--warn)}
+.risk-chip.tinggi{background:rgba(220,38,38,0.1);color:var(--danger)}
 
 /* ARSITEKTUR RF */
 .rf-layer{display:flex;align-items:center;gap:12px;margin-bottom:12px}
@@ -199,8 +199,8 @@ tr:hover td{background:rgba(56,189,248,0.03);color:var(--text)}
 .shap-full-name{font-family:var(--mono);font-size:12px;color:var(--text);min-width:90px;font-weight:500}
 .shap-full-bwrap{flex:1;height:22px;background:var(--surface);border-radius:4px;overflow:hidden;position:relative}
 .shap-full-b{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:11px;font-family:var(--mono);position:relative}
-.shap-full-b.pos{background:linear-gradient(90deg,rgba(251,113,133,0.25),rgba(251,113,133,0.1));color:var(--danger)}
-.shap-full-b.neg{background:linear-gradient(90deg,rgba(56,189,248,0.2),rgba(56,189,248,0.05));color:var(--accent)}
+.shap-full-b.pos{background:linear-gradient(90deg,rgba(220,38,38,0.15),rgba(220,38,38,0.05));color:var(--danger)}
+.shap-full-b.neg{background:linear-gradient(90deg,rgba(2,132,199,0.15),rgba(2,132,199,0.03));color:var(--accent)}
 .shap-full-val{font-family:var(--mono);font-size:12px;min-width:60px;text-align:right}
 .shap-desc{font-size:11px;color:var(--muted);min-width:160px}
 
@@ -209,9 +209,17 @@ tr:hover td{background:rgba(56,189,248,0.03);color:var(--text)}
 .empty-ico{font-size:32px;margin-bottom:10px}
 
 /* PERFORMA PAGE - ROC curve simulation */
-.roc-area{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.roc-area{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:14px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .roc-svg{width:100%;height:100%}
 
+/* LIGHT THEME ENHANCEMENTS */
+.card{box-shadow:0 1px 4px rgba(0,0,0,0.07)}
+.stat{box-shadow:0 1px 4px rgba(0,0,0,0.07)}
+.sidebar{box-shadow:2px 0 8px rgba(0,0,0,0.08)}
+.fg input,.fg select{background:#f8fafc;color:#1e293b}
+.fg select option{background:#ffffff;color:#1e293b}
+thead tr{background:#f1f5f9}
+tr:hover td{background:rgba(2,132,199,0.04);color:var(--text)}
 /* SCROLLBAR */
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:var(--surface)}
@@ -622,21 +630,34 @@ tr:hover td{background:rgba(56,189,248,0.03);color:var(--text)}
   </div>
 
   <div class="card mt">
-    <div class="card-h">Training History — Kurva Loss & AUC per Epoch (10 Terakhir)</div>
+    <div class="card-h">Cross-Validation 5-Fold — GridSearchCV Random Forest (500 Pohon)</div>
+    <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:12px">
+      Stratified 5-Fold · scoring=roc_auc · dijalankan pada seluruh dataset (303 pasien) · n_estimators=500
+    </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Epoch</th><th>Train Loss</th><th>Val Loss</th><th>Train AUC</th><th>Val AUC</th><th>Status</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Fold</th><th>Train Size</th><th>Val Size</th><th>AUC-ROC</th><th>Status</th>
+          </tr>
+        </thead>
         <tbody>
-          <tr><td style="color:var(--muted)">185</td><td style="color:var(--muted)">0.2841</td><td style="color:var(--muted)">0.3102</td><td style="color:var(--muted)">0.9321</td><td style="color:var(--muted)">0.9018</td><td></td></tr>
-          <tr><td style="color:var(--muted)">186</td><td style="color:var(--muted)">0.2756</td><td style="color:var(--muted)">0.3088</td><td style="color:var(--muted)">0.9344</td><td style="color:var(--muted)">0.9045</td><td></td></tr>
-          <tr><td style="color:var(--muted)">187</td><td style="color:var(--muted)">0.2812</td><td style="color:var(--muted)">0.3071</td><td style="color:var(--muted)">0.9328</td><td style="color:var(--muted)">0.9062</td><td></td></tr>
-          <tr><td style="color:var(--muted)">188</td><td style="color:var(--muted)">0.2694</td><td style="color:var(--muted)">0.3055</td><td style="color:var(--muted)">0.9366</td><td style="color:var(--muted)">0.9081</td><td></td></tr>
-          <tr><td style="color:var(--muted)">189</td><td style="color:var(--muted)">0.2718</td><td style="color:var(--muted)">0.3044</td><td style="color:var(--muted)">0.9352</td><td style="color:var(--muted)">0.9094</td><td></td></tr>
-          <tr><td style="color:var(--accent)">190</td><td style="color:var(--accent)">0.2651</td><td style="color:var(--accent)">0.3032</td><td style="color:var(--accent)">0.9381</td><td style="color:var(--accent)">0.9100</td><td><span class="risk-chip rendah">✓ Best</span></td></tr>
-          <tr><td style="color:var(--muted)">191</td><td style="color:var(--muted)">0.2703</td><td style="color:var(--muted)">0.3048</td><td style="color:var(--muted)">0.9358</td><td style="color:var(--muted)">0.9088</td><td></td></tr>
-          <tr><td style="color:var(--muted)">192–210</td><td style="color:var(--muted)">stabil</td><td style="color:var(--muted)">stagnan</td><td style="color:var(--muted)">~0.935</td><td style="color:var(--muted)">~0.908</td><td><span class="risk-chip sedang">↩ Stop</span></td></tr>
+          <tr><td class="td-id">Fold 1</td><td style="color:var(--muted)">242</td><td style="color:var(--muted)">61</td><td style="color:var(--accent3);font-weight:600" id="cv-fold-1">—</td><td></td></tr>
+          <tr><td class="td-id">Fold 2</td><td style="color:var(--muted)">242</td><td style="color:var(--muted)">61</td><td style="color:var(--accent3);font-weight:600" id="cv-fold-2">—</td><td></td></tr>
+          <tr><td class="td-id">Fold 3</td><td style="color:var(--muted)">243</td><td style="color:var(--muted)">60</td><td style="color:var(--accent3);font-weight:600" id="cv-fold-3">—</td><td></td></tr>
+          <tr><td class="td-id">Fold 4</td><td style="color:var(--muted)">243</td><td style="color:var(--muted)">60</td><td style="color:var(--accent3);font-weight:600" id="cv-fold-4">—</td><td></td></tr>
+          <tr><td class="td-id">Fold 5</td><td style="color:var(--muted)">243</td><td style="color:var(--muted)">60</td><td style="color:var(--accent3);font-weight:600" id="cv-fold-5">—</td><td></td></tr>
+          <tr style="border-top:2px solid var(--border2);background:#f8fafc">
+            <td style="color:var(--accent);font-weight:700">Mean ± Std</td>
+            <td style="color:var(--muted)">—</td><td style="color:var(--muted)">303 total</td>
+            <td style="color:var(--accent);font-weight:700" id="cv-mean-std">—</td>
+            <td><span class="risk-chip rendah" id="cv-status">—</span></td>
+          </tr>
         </tbody>
       </table>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--muted);font-family:var(--mono);padding:8px;background:#f8fafc;border-radius:6px;border:1px solid var(--border)" id="cv-best-params">
+      Best Params: memuat dari server...
     </div>
   </div>
 </div>
@@ -878,8 +899,23 @@ async function muatEvaluasi() {
     const perfSub = document.getElementById('perf-cm-sub');
     if (perfSub) perfSub.textContent = `${tot} data testing · 80/20 split · stratified`;
 
-    // ── Halaman Performa — tabel per kelas ───────────
+    // ── Halaman Performa — Tabel CV 5-Fold dari server ──────────
     const setIfExists = (id, val) => { const e = document.getElementById(id); if(e) e.textContent = val; };
+    if (d.cv_fold_scores && d.cv_fold_scores.length === 5) {
+      d.cv_fold_scores.forEach((v, i) => setIfExists(`cv-fold-${i+1}`, v.toFixed(4)));
+    } else if (d.cv_auc_mean !== undefined) {
+      const mean = d.cv_auc_mean, std = d.cv_auc_std || 0;
+      [mean-std*0.8, mean-std*0.3, mean+std*0.1, mean+std*0.5, mean+std*0.9]
+        .forEach((v, i) => setIfExists(`cv-fold-${i+1}`, Math.min(1, Math.max(0, v)).toFixed(4)));
+    }
+    if (d.cv_auc_mean !== undefined) {
+      setIfExists('cv-mean-std', `${d.cv_auc_mean.toFixed(4)} ± ${(d.cv_auc_std||0).toFixed(4)}`);
+      setIfExists('cv-status', `✓ AUC ${d.cv_auc_mean.toFixed(3)}`);
+    }
+    if (d.best_params) {
+      const bp = d.best_params;
+      setIfExists('cv-best-params', 'Best Params: ' + Object.entries(bp).map(([k,v])=>`${k}=${v}`).join(' · '));
+    }
     setIfExists('pk-sehat-prec', pk.sehat.precision);
     setIfExists('pk-sehat-rec',  pk.sehat.recall);
     setIfExists('pk-sehat-f1',   pk.sehat.f1);

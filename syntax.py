@@ -653,8 +653,9 @@ metrik = {
     'total_test': len(y_test),
     'tn': int(tn), 'fp': int(fp), 'fn': int(fn), 'tp': int(tp),
     'best_params' : best_params,
-    'cv_auc_mean' : round(float(cv_scores.mean()), 4),
-    'cv_auc_std'  : round(float(cv_scores.std()),  4),
+    'cv_auc_mean'   : round(float(cv_scores.mean()), 4),
+    'cv_auc_std'    : round(float(cv_scores.std()),  4),
+    'cv_fold_scores': [round(float(v), 4) for v in cv_scores],
     'model'       : 'RandomForest + GridSearchCV + SHAP',
     'n_features'  : len(feature_cols),
     'feature_cols': feature_cols
